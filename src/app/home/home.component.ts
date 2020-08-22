@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { interval, Subscription, Observable } from "rxjs";
+import { map, filter } from "rxjs/operators";
 
 @Component({
   selector: 'app-home',
@@ -47,7 +48,16 @@ export class HomeComponent implements OnInit, OnDestroy {
      *    technically in both cases, no new values are emitted but regarding the functions
      *    that get called here( ()=> {console.log('Complete)} ), there is a difference.
      */
-    this.firstObsSubscription = customIntervalObservable.subscribe(data => {
+    this.firstObsSubscription = customIntervalObservable.pipe(filter(data => {
+      /* 
+       * return true or false which decides whether that data point will continue in that chain,
+       * so whether it will reach map and thereafter, the subscription or whether it will be dropped,
+       * in which case it will neither reach map nor the subscription
+       */
+      return data > 0;
+    }), map((data:number) => {
+      return 'Round: ' + (data + 1);
+    })).subscribe(data => {
       console.log(data);
     }, error => {
       console.log(error);
