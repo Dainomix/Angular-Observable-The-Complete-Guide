@@ -23,12 +23,37 @@ export class HomeComponent implements OnInit, OnDestroy {
       let count = 0;
       setInterval(() => {
         observer.next(count);
+
+        if(count === 5) {
+          observer.complete();
+        }
+
+        if(count > 3) {
+          observer.error(new Error('Count is greater than 3!'));
+        }
+        
         count++;
       }, 1000);
     });
 
+    /*
+     * throwing an error actually cancels the observable and lets it die
+     * Completing can be a normal process in an observable. and also we don't need to unsubscribe
+     * if our observable did complete but again, we mignt not know that here in ngOnDestroy
+     * so we can still do that without getting errors
+     * 
+     * When it cancels due to an error, then that's a different thing than when it completes.
+     * => An error cancels the observable, it does not complete it,
+     *    technically in both cases, no new values are emitted but regarding the functions
+     *    that get called here( ()=> {console.log('Complete)} ), there is a difference.
+     */
     this.firstObsSubscription = customIntervalObservable.subscribe(data => {
       console.log(data);
+    }, error => {
+      console.log(error);
+      alert(error.message);
+    }, () => {
+      console.log('Completed!');
     })
   }
 
